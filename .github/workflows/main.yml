@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout repository
@@ -14,7 +14,8 @@ jobs:
     - name: Install compiler tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-arm-linux-gnueabi build-essential ncurses-dev bc bison flex libssl-dev
+        sudo apt-get install -y gcc-4.7-arm-linux-gnueabi build-essential ncurses-dev bc bison flex libssl-dev
+        sudo ln -sf /usr/bin/arm-linux-gnueabi-gcc-4.7 /usr/bin/arm-linux-gnueabi-gcc
 
     - name: Configure and Compile Kernel
       run: |
@@ -27,3 +28,4 @@ jobs:
       with:
         name: finished-recovery-image
         path: recovery.img
+
