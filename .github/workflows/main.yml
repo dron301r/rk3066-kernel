@@ -1,0 +1,29 @@
+name: Build Kernel Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install compiler tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-linux-gnueabi build-essential ncurses-dev bc bison flex libssl-dev
+
+    - name: Configure and Compile Kernel
+      run: |
+        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- rk30_hdbox_defconfig
+        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j$(nproc)
+        ./mkkrnlimg arch/arm/boot/zImage recovery.img
+
+    - name: Upload Finished Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: finished-recovery-image
+        path: recovery.img
