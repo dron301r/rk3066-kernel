@@ -5,22 +5,23 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install compiler tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-arm-linux-gnueabi build-essential ncurses-dev bc bison flex libssl-dev
-
-    - name: Configure and Compile Kernel
-      run: |
-        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- rk30_hdbox_defconfig
-        make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- HOSTCFLAGS="-O2 -fcommon" -j$(nproc)
-        ./mkkrnlimg arch/arm/boot/zImage recovery.img
+    - name: Compile inside precise container
+      uses: docker://ubuntu:14.04
+      with:
+        args: >
+          bash -c "
+          apt-get update &&
+          apt-get install -y gcc-arm-linux-gnueabi build-essential ncurses-dev bc bison flex libssl-dev &&
+          make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- rk30_hdbox_defconfig &&
+          make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j$(nproc) &&
+          ./mkkrnlimg arch/arm/boot/zImage recovery.img
+          "
 
     - name: Upload Finished Image
       uses: actions/upload-artifact@v4
